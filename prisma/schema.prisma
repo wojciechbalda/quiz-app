@@ -12,3 +12,91 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Follows {
+  followedBy   User @relation("followedBy", fields: [followedById], references: [id])
+  followedById String
+  following    User @relation("following", fields: [followingId], references: [id])
+  followingId  String
+
+  @@id([followingId, followedById])
+}
+
+model Likes {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId Int
+}
+
+model Category {
+  name String @id
+  quizes Quiz[]
+}
+
+model Quiz {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  title String
+  time Int
+  thumbnail String
+  description String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  category Category @relation(fields: [categoryName], references: [name])
+  categoryName String
+  content SingleQuestionAndAnswers[]
+  likes Likes[]
+}
+
+model SingleQuestionAndAnswers {
+  id Int @id @default(autoincrement())
+  question String
+  answers String[]
+  correctAnswer Int
+  points Int
+  quiz Quiz @relation(fields: [quizId], references: [id])
+  quizId Int
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quizes Quiz[]
+  likes Likes[] 
+  followedBy Follows[] @relation("followedBy")
+  following  Follows[] @relation("following")
+  color String @default("bg-neutral-500")
+ 
+  @@map("users")
+}
