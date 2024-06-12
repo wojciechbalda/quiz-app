@@ -90,7 +90,7 @@ export default function QuizCard({
         }
         <div className="flex gap-2">
           <Link href={`/${id}`} className={buttonVariants()}>
-            Przejdź dalej
+            Continue
           </Link>
           {isRemoveButtonVisible && 
             <Button onClick={handleDeleteQuiz} className="flex gap-2" variant="outline">

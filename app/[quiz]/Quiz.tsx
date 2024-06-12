@@ -218,11 +218,11 @@ type ResultsSectionProps = {
 function ResultSection({points, maxPoints, category, user}: ResultsSectionProps) {
   return (
     <>
-      <H1>Gratulacje!!!</H1>
-      <p className="text-5xl font-bold uppercase">Twój wynik to:</p>
+      <H1>Congratulations!!!</H1>
+      <p className="text-5xl font-bold uppercase">Your score is:</p>
       <p>{points}/{maxPoints} POINTS ({Math.floor(points * 100 / maxPoints)}%)</p>
-      <Link href={`/users/${user}`} className={buttonVariants()}>Zobacz inne quizy tego autora</Link>
-      <Link href={`/category/${category}`} className={buttonVariants()}>Zobacz pozostałe quizy</Link>
+      <Link href={`/users/${user}`} className={buttonVariants()}>See other quizzes by this author</Link>
+      <Link href={`/category/${category}`} className={buttonVariants()}>See other quizzes</Link>
     </>
   );
 }
