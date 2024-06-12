@@ -57,8 +57,8 @@ export default async function Page({
                 title={title}
                 description={description}
                 isLikedByVisitor={likes && !!likes.length}
-                isSignedIn={userId === id}
-                isRemoveButtonVisible={false}
+                isSignedIn={!!userId}
+                isRemoveButtonVisible={userId === id}
               />
             )
           )}

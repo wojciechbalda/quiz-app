@@ -56,7 +56,7 @@ model SingleQuestionAndAnswers {
   answers String[]
   correctAnswer Int
   points Int
-  quiz Quiz @relation(fields: [quizId], references: [id])
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
   quizId Int
 }
 

@@ -6,7 +6,7 @@ import { QuizSchema, QuizSchemaType } from "@/types";
 import { z } from "zod";
 import { QUIZ_PER_PAGE } from ".";
 import { auth } from "@/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function createQuiz(data: QuizSchemaType) {
   const session = await auth();
@@ -53,7 +53,6 @@ export async function checkAnswers(
   const sData = await prisma.singleQuestionAndAnswers.findMany({
     where: {
        quizId,
-      // quizId,
     },
     select: {
       id: true,
@@ -106,11 +105,11 @@ export async function likeQuiz(id: number) {
         userId,
       },
     });
+    revalidatePath('/', 'layout')
     return { message: "You liked the quiz successfully", value: 1 };
   } catch (err) {
     return { error: true, message: "Something went wrong" };
   }
-  // return { success: true };
 }
 
 export async function unlikeQuiz(id: number) {
@@ -131,6 +130,7 @@ export async function unlikeQuiz(id: number) {
         userId,
       },
     });
+    revalidatePath('/', 'layout')
     return { message: "Like was removed", value: -1 };
   } catch (err) {
     return { error: true, message: "Something went wrong" };
@@ -236,6 +236,9 @@ export async function changeUserSettings(data: Settings) {
 
 export const getUserQuizes = async (id: string, page: number) => {
   try {
+    const session = await auth();
+    const userId = session?.user?.id
+
     const result = await prisma.quiz.findMany({
       where: {
         userId: id,
@@ -248,10 +251,10 @@ export const getUserQuizes = async (id: string, page: number) => {
             likes: true,
           },
         },
-        ...(id && {
+        ...(userId && {
           likes: {
             where: {
-              userId: id,
+              userId,
             },
           },
         }),
@@ -263,3 +266,33 @@ export const getUserQuizes = async (id: string, page: number) => {
     throw new Error(`Something went wrong  ${err}`)
   }
 };
+
+export const deleteQuiz = async (id: number) =>
+{
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId)
+    return {error: true, message: "You have to signed in"}
+
+  const parsedData = z.number().safeParse(id)
+
+  if (!parsedData.success)
+    return {error: true, message: "Incorrect data"}
+
+  try
+  {
+    await prisma.quiz.delete({
+      where: {
+        id,
+        userId, 
+      }
+    })
+    revalidatePath('/', 'layout')
+    return { error: false, message: `Quiz (${id}) has been deleted` };
+  }
+  catch (err)
+  {
+    return { error: true, message: `Quiz has not been deleted` }
+  }
+}

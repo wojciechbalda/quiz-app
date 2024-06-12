@@ -6,7 +6,8 @@ import { Button, buttonVariants } from "./ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { likeQuiz, unlikeQuiz } from "@/data/actions";
+import { deleteQuiz, likeQuiz, unlikeQuiz } from "@/data/actions";
+import { useToast } from "./ui/use-toast";
 
 type QuizCardProps = {
   likes: number;
@@ -29,6 +30,7 @@ export default function QuizCard({
   isSignedIn,
   isRemoveButtonVisible
 }: QuizCardProps) {
+  const { toast } = useToast()
   const [isLiked, setIsLiked] = useState(isLikedByVisitor);
   const [likesNumber, setLikesNumber] = useState(likes);
 
@@ -45,6 +47,15 @@ export default function QuizCard({
       setLikesNumber((value) => value + res.value!);
     }
   };
+
+  const handleDeleteQuiz = async () => {
+    const { error, message } = await deleteQuiz(id);
+
+    toast({
+      title: message,
+      variant: error ? 'destructive' : 'default'
+    })
+  }
 
   return (
     <Card className="flex flex-col overflow-hidden">
@@ -81,13 +92,11 @@ export default function QuizCard({
           <Link href={`/${id}`} className={buttonVariants()}>
             Przejdź dalej
           </Link>
-          {isRemoveButtonVisible && isSignedIn && 
-          <form>
-            <Button className="flex gap-2" variant="outline">
+          {isRemoveButtonVisible && 
+            <Button onClick={handleDeleteQuiz} className="flex gap-2" variant="outline">
               Remove
               <Trash size={16} />
             </Button>
-          </form>
           }
         </div>
       </CardFooter>
